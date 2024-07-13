@@ -1,0 +1,53 @@
+version: "3.9"
+services:
+  backend:
+    build: ./backend
+    container_name: kpd-back
+    ports:
+      - "4000:3000"
+    depends_on:
+      - postgres
+    restart: on-failure
+    env_file: .env
+    networks:
+      - backend
+  postgres:
+    image: postgres
+    container_name: postgres
+    env_file: .env
+    volumes:
+      - pgdata:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    networks:
+      - internal-network
+      - backend
+  frontend:
+    build: ./frontend
+    container_name: kpd-front
+    ports:
+      - "8081:80"
+    restart: on-failure
+    networks:
+      - frontend
+  adminer:
+    container_name: adminer
+    networks:
+      - backend
+    image: adminer
+    ports:
+      - 8085:8080
+    depends_on:
+      - postgres
+    restart: on-failure       
+volumes:
+  pgdata:
+networks:
+  internal-network:
+    driver: bridge
+    internal: true
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
